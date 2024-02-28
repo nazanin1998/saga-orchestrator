@@ -1,15 +1,13 @@
 package com.nazaninfz.sagaorchestrator.engine;
 
-import com.nazaninfz.sagaorchestrator.entity.SagaSequenceEntity;
-import com.nazaninfz.sagaorchestrator.enums.SequenceStatus;
-import com.nazaninfz.sagaorchestrator.exception.SagaGeneralException;
-import com.nazaninfz.sagaorchestrator.exception.UnSuccessfulRollbackException;
-import com.nazaninfz.sagaorchestrator.factory.SagaSequenceFactory;
-import com.nazaninfz.sagaorchestrator.interfaces.SagaCommandOutput;
-import com.nazaninfz.sagaorchestrator.model.SagaBaseCommand;
-import com.nazaninfz.sagaorchestrator.model.SagaCommand;
-import com.nazaninfz.sagaorchestrator.model.SagaSequence;
-import com.nazaninfz.sagaorchestrator.model.SagaSubSequence;
+import com.nazaninfz.sagaorchestrator.core.entity.SagaSequenceEntity;
+import com.nazaninfz.sagaorchestrator.core.enums.SequenceStatus;
+import com.nazaninfz.sagaorchestrator.core.exception.SagaGeneralException;
+import com.nazaninfz.sagaorchestrator.core.exception.UnSuccessfulRollbackException;
+import com.nazaninfz.sagaorchestrator.core.factory.SagaSequenceFactory;
+import com.nazaninfz.sagaorchestrator.core.interfaces.SagaCommandOutput;
+import com.nazaninfz.sagaorchestrator.core.model.SagaCommand;
+import com.nazaninfz.sagaorchestrator.core.model.SagaSequence;
 import com.nazaninfz.sagaorchestrator.service.SagaSequenceServices;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +53,7 @@ public class SagaSequenceExecutor {
     }
 
     private void executeRootCommand(
-            SagaBaseCommand rootCommand,
+            SagaCommand rootCommand,
             SagaSequenceEntity sequenceEntity,
             Map<String, SagaCommandOutput> outputMap,
             Map<String, Object> contextMap
@@ -64,19 +62,11 @@ public class SagaSequenceExecutor {
         String title = sequenceEntity.getSequenceTitle();
 
         try {
-            if (rootCommand instanceof SagaCommand) {
-                commandExecutor.executeCommand(
-                        rootCommand,
-                        contextMap,
-                        outputMap,
-                        sequenceEntity);
-            } else if (rootCommand instanceof SagaSubSequence) {
-                commandExecutor.executeCommand(
-                        ((SagaSubSequence) rootCommand).getRootCommand(),
-                        contextMap,
-                        outputMap,
-                        sequenceEntity);
-            }
+            commandExecutor.executeCommand(
+                    rootCommand,
+                    contextMap,
+                    outputMap,
+                    sequenceEntity);
 
             sequenceEntity = sequenceEntity.saveNewStatus(SequenceStatus.SUCCEED, sequenceServices);
             sendCompleteSignal(id);

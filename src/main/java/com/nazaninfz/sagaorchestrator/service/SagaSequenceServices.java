@@ -1,7 +1,7 @@
 package com.nazaninfz.sagaorchestrator.service;
 
-import com.nazaninfz.sagaorchestrator.entity.SagaSequenceEntity;
-import com.nazaninfz.sagaorchestrator.exception.mongo.SaveSequenceException;
+import com.nazaninfz.sagaorchestrator.core.entity.SagaSequenceEntity;
+import com.nazaninfz.sagaorchestrator.core.exception.mongo.SaveSequenceException;
 import com.nazaninfz.sagaorchestrator.repository.SagaSequenceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

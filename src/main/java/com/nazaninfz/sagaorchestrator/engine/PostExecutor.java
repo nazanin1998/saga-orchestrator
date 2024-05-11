@@ -36,17 +36,16 @@ public class PostExecutor {
         String commandTitle = commandEntity.getCommandTitle();
         if (CollectionUtils.isEmpty(postExecutions)) {
             log.info("no post execution for command, id: {}, title: {}", commandId, commandTitle);
-            saveNewStatus(commandEntity, POST_EXECUTION_NOT_NEEDED, commandServices);
+            saveNewStatus(commandEntity, POST_EXECUTION_NOT_NEEDED);
             return;
         }
         log.info("start post executions for command, id: {}, title: {}",  commandId, commandTitle);
-        saveNewStatus(commandEntity, POST_EXECUTION_STARTED, commandServices);
+        saveNewStatus(commandEntity, POST_EXECUTION_STARTED);
 
         for (CommandPostExecution postExecution : postExecutions) {
             doPostExecution(postExecution, input, commandEntity, outputMap, contextMap);
-            commandEntity.addSuccessStep(postExecution, SagaCommandStepType.POST_EXECUTION);
         }
-        saveNewStatus(commandEntity, POST_EXECUTION_PASSED, commandServices);
+        saveNewStatus(commandEntity, POST_EXECUTION_PASSED);
     }
 
     private void doPostExecution(
@@ -58,21 +57,21 @@ public class PostExecutor {
     ) {
         try {
             postExecution.execute(input, outputMap, contextMap);
+            commandEntity.addSuccessStep(postExecution, SagaCommandStepType.POST_EXECUTION);
         } catch (Exception e) {
             log.error("exception in post execution: {} command title: {}",
                     postExecution.getTitle(),
                     commandEntity.getCommandTitle()
             );
             commandEntity.addFailureStep(postExecution, SagaCommandStepType.POST_EXECUTION, e);
-            saveNewStatus(commandEntity, POST_EXECUTION_FAILED, commandServices);
+            saveNewStatus(commandEntity, POST_EXECUTION_FAILED);
             throw new PostExecutionException(e);
         }
     }
 
     private void saveNewStatus(
             SagaCommandEntity commandEntity,
-            CommandStatus newStatus,
-            SagaCommandServices commandServices
+            CommandStatus newStatus
     ) {
         commandEntity = commandServices.saveCommand(commandEntity.setCommandStatus(newStatus));
     }

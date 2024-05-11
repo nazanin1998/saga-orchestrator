@@ -116,8 +116,10 @@ public class SagaCommandExecutor {
                 command.getCommandId(),
                 command.getCommandTitle());
         commandEntity.setExceptionSubText(ExceptionUtils.getStackTrace(e));
-        commandEntity = commandEntity.save(commandServices);
+
         if (command.getOnExceptionBehavior() == OnExceptionBehavior.ROLLBACK) {
+            commandEntity.setCommandStatus(CommandStatus.COMMITTING_FAILED);
+            commandEntity = commandEntity.save(commandServices);
             throw e;
         }
         if (command.getOnExceptionBehavior() == OnExceptionBehavior.SKIP) {

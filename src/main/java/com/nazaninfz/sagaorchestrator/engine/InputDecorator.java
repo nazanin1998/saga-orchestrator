@@ -33,31 +33,30 @@ public class InputDecorator {
         String commandTitle = commandEntity.getCommandTitle();
         if (decorator == null) {
             log.info("no decorator for command, id: {}, title: {}", commandId, commandTitle);
-            saveNewStatus(commandEntity, DECORATION_NOT_NEEDED, commandServices);
+            saveNewStatus(commandEntity, DECORATION_NOT_NEEDED);
             return;
         }
         log.info("start input decoration for command, id: {}, title: {}", commandId, commandTitle);
-        saveNewStatus(commandEntity, DECORATION_STARTED, commandServices);
+        saveNewStatus(commandEntity, DECORATION_STARTED);
 
         try {
             decorator.decorate(input, outputMap, contextMap);
             commandEntity.addSuccessStep(decorator, SagaCommandStepType.DECORATOR);
-            saveNewStatus(commandEntity, DECORATION_PASSED, commandServices);
+            saveNewStatus(commandEntity, DECORATION_PASSED);
         } catch (Exception e) {
             log.error("exception in decorating: {} command title: {}",
                     decorator.getTitle(),
                     commandTitle
             );
             commandEntity.addFailureStep(decorator, SagaCommandStepType.DECORATOR, e);
-            saveNewStatus(commandEntity, DECORATION_FAILED, commandServices);
+            saveNewStatus(commandEntity, DECORATION_FAILED);
             throw new InputDecorationException(e);
         }
     }
 
     private void saveNewStatus(
             SagaCommandEntity commandEntity,
-            CommandStatus newStatus,
-            SagaCommandServices commandServices
+            CommandStatus newStatus
     ) {
         commandEntity = commandServices.saveCommand(commandEntity.setCommandStatus(newStatus));
     }

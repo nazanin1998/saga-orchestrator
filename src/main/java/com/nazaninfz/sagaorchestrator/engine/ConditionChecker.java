@@ -35,22 +35,22 @@ public class ConditionChecker {
         String commandTitle = commandEntity.getCommandTitle();
         if (CollectionUtils.isEmpty(conditions)) {
             log.info("no conditions for command, id: {}, title: {}", commandId, commandTitle);
-            saveNewStatus(commandEntity, CONDITIONS_CHECKING_NOT_NEEDED, commandServices);
+            saveNewStatus(commandEntity, CONDITIONS_CHECKING_NOT_NEEDED);
             return true;
         }
         log.info("start checking conditions of command, id: {}, title: {}", commandId, commandTitle);
-        saveNewStatus(commandEntity, CONDITIONS_CHECKING_STARTED, commandServices);
+        saveNewStatus(commandEntity, CONDITIONS_CHECKING_STARTED);
 
         for (CommandExecutionCondition condition : conditions) {
             boolean isSatisfied = isConditionSatisfied(condition, input, commandEntity, outputMap, contextMap);
             if (!isSatisfied) {
                 commandEntity.addFailureStep(condition, SagaCommandStepType.CONDITION);
-                saveNewStatus(commandEntity, CONDITIONS_CHECKING_FAILED, commandServices);
+                saveNewStatus(commandEntity, CONDITIONS_CHECKING_FAILED);
                 return false;
             }
             commandEntity.addSuccessStep(condition, SagaCommandStepType.CONDITION);
         }
-        saveNewStatus(commandEntity, CONDITIONS_CHECKING_PASSED, commandServices);
+        saveNewStatus(commandEntity, CONDITIONS_CHECKING_PASSED);
         return true;
     }
 
@@ -69,15 +69,14 @@ public class ConditionChecker {
                     commandEntity.getCommandTitle()
             );
             commandEntity.addFailureStep(condition, SagaCommandStepType.CONDITION, e);
-            saveNewStatus(commandEntity, CONDITIONS_CHECKING_FAILED, commandServices);
+            saveNewStatus(commandEntity, CONDITIONS_CHECKING_FAILED);
             throw new ConditionCheckException(e);
         }
     }
 
     private void saveNewStatus(
             SagaCommandEntity commandEntity,
-            CommandStatus newStatus,
-            SagaCommandServices commandServices
+            CommandStatus newStatus
     ) {
         commandEntity = commandServices.saveCommand(commandEntity.setCommandStatus(newStatus));
     }
